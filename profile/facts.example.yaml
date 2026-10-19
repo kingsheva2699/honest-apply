@@ -1,0 +1,66 @@
+# Your fact bank. Copy this file to profile/facts.yaml (git-ignored), or run
+# `python apply.py init`, and replace everything with YOUR true facts. The kit
+# only puts bullets from this file on a resume, and blocks any package that
+# claims something in `never_claim`.
+#
+# Everything below is about a fictional person.
+
+name: Maya Chen
+contact:
+  city: Halifax, NS
+  phone: (555) 014-2277
+  email: maya.chen@example.com
+  # link: linkedin.com/in/your-profile
+
+headline: Patient Scheduling and Front Desk
+summary: >-
+  Friendly, detail-oriented front desk professional with three years in a busy
+  dental clinic, booking appointments, handling patient questions and keeping
+  records accurate. Calm on the phone and quick with scheduling software.
+
+experience:
+  - id: brightsmile
+    company: Bright Smile Dental
+    title: Receptionist
+    dates: Jun 2022 - Sep 2025
+    bullets:
+      - Booked and confirmed about 60 patient appointments a day by phone, email and online requests.
+      - Checked patients in and out, collected payments and processed insurance claims.
+      - Kept patient records up to date in the clinic's scheduling software.
+      - Rebooked cancellations from a waitlist to keep the schedule full.
+      - Answered patient questions about appointments, billing and clinic policies.
+  - id: pages
+    company: Pages Bookshop
+    title: Sales Associate
+    dates: 2019 - 2022
+    bullets:
+      - Helped customers find books and placed special orders.
+      - Ran the till and balanced the cash drawer at closing.
+      - Set up weekly window and table displays.
+
+skills: >-
+  Appointment scheduling | Patient communication | Insurance claims |
+  Microsoft Word and Outlook | Google Calendar
+
+education:
+  - Diploma in Office Administration, Nova Scotia Community College, 2019
+work_authorization: Authorized to work in Canada.
+
+# Things you must never claim. A package that states any of these (outside a
+# negation such as "I am not a certified dental assistant") is blocked.
+never_claim:
+  - certified dental assistant
+  - dental hygienist
+  - registered
+  - degree
+  - fluent french
+  - bilingual
+  - quickbooks
+  - team lead
+  - supervised
+
+# How close a resume bullet must be to a fact-bank bullet (0-1). 0.85 allows
+# small wording edits but not new claims.
+bullet_match_threshold: 0.85
+default_bullets: 3
+letter_signoff: "Sincerely,"

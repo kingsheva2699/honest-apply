@@ -1,0 +1,11 @@
+# Personal data stays local
+profile/*
+!profile/*.example.*
+data/
+out/
+jobs/*
+!jobs/example_*.json
+.env
+__pycache__/
+*.pyc
+.pytest_cache/
