@@ -24,7 +24,6 @@ from __future__ import annotations
 import argparse
 import csv
 import datetime as dt
-import difflib
 import html
 import json
 import os
@@ -74,6 +73,37 @@ def bullet_bank(facts: dict) -> dict[str, list[str]]:
     return {e["id"]: list(e.get("bullets", [])) for e in facts.get("experience", [])}
 
 
+def bullet_selection_errors(spec: dict, facts: dict) -> list[str]:
+    """Validate exact fact selections; these errors cannot be forced through build."""
+    selected = spec.get("bullets")
+    if selected is None:
+        return []  # Omitted/null selections use the existing default fact bullets.
+    if not isinstance(selected, dict):
+        return ["bullets: must be an object mapping experience IDs to lists"]
+    bank = bullet_bank(facts)
+    errors = []
+    for exp_id, bullets in selected.items():
+        if exp_id not in bank:
+            errors.append(f'bullets: unknown experience id "{exp_id}" (not in facts)')
+            continue
+        if not isinstance(bullets, list):
+            errors.append(f"bullets.{exp_id}: must be a list of indices or exact fact text")
+            continue
+        for b in bullets:
+            if type(b) is int:  # bool is an int subclass, but never a valid index.
+                if not 0 <= b < len(bank[exp_id]):
+                    errors.append(f"bullets.{exp_id}: index {b} out of range")
+            elif isinstance(b, str):
+                if b not in bank[exp_id]:
+                    errors.append(
+                        f'bullets.{exp_id}: not in your fact bank (exact text required) -> "{b[:100]}". '
+                        "Confirm and update facts.yaml first, or pick an existing bullet."
+                    )
+            else:
+                errors.append(f"bullets.{exp_id}: expected an integer index or exact fact text")
+    return errors
+
+
 # --------------------------------------------------------------------------- honesty check
 def _sentences(text: str) -> list[str]:
     return [s.strip() for s in re.split(r"(?<=[.!?])\s+|\n+", text) if s.strip()]
@@ -84,8 +114,6 @@ def check_spec(spec: dict, facts: dict) -> tuple[list[str], list[str]]:
     errors: list[str] = []
     warnings: list[str] = []
     banned = [b.lower() for b in facts.get("never_claim", [])]
-    bank = bullet_bank(facts)
-    threshold = float(facts.get("bullet_match_threshold", 0.85))
 
     # 1. Free text (headline, profile, skills, letter): banned claims outside a negation.
     free = {
@@ -101,25 +129,17 @@ def check_spec(spec: dict, facts: dict) -> tuple[list[str], list[str]]:
                 if re.search(r"\b" + re.escape(term) + r"\b", low) and not NEGATIONS.search(low):
                     errors.append(f'{field}: claims "{term}" -> "{sent[:120]}"')
 
-    # 2. Resume bullets must come from the fact bank (exact id or close match).
-    for exp_id, bullets in (spec.get("bullets") or {}).items():
-        if exp_id not in bank:
-            errors.append(f'bullets: unknown experience id "{exp_id}" (not in facts)')
-            continue
-        for b in bullets:
-            if isinstance(b, int):
-                if not 0 <= b < len(bank[exp_id]):
-                    errors.append(f"bullets.{exp_id}: index {b} out of range")
-                continue
-            best = max((difflib.SequenceMatcher(None, b.lower(), f.lower()).ratio() for f in bank[exp_id]), default=0)
-            if best < threshold:
-                errors.append(
-                    f'bullets.{exp_id}: not in your fact bank (best match {best:.0%}) -> "{b[:100]}". '
-                    "Add it to facts.yaml if it is true, or pick an existing bullet."
-                )
-            for term in banned:
-                if re.search(r"\b" + re.escape(term) + r"\b", b.lower()) and not NEGATIONS.search(b.lower()):
-                    errors.append(f'bullets.{exp_id}: claims "{term}" -> "{b[:100]}"')
+    # 2. Exact selections only; no fuzzy match or threshold escape hatch.
+    selection_errors = bullet_selection_errors(spec, facts)
+    errors.extend(selection_errors)
+    if not selection_errors:
+        for exp_id, bullets in (spec.get("bullets") or {}).items():
+            for b in bullets:
+                if not isinstance(b, str):
+                    continue
+                for term in banned:
+                    if re.search(r"\b" + re.escape(term) + r"\b", b.lower()) and not NEGATIONS.search(b.lower()):
+                        errors.append(f'bullets.{exp_id}: claims "{term}" -> "{b[:100]}"')
 
     # 3. The letter must name this company and must not name a company you applied to before.
     letter = free["letter"]
@@ -166,6 +186,9 @@ def _esc(s: str) -> str:
 
 
 def resume_html(spec: dict, facts: dict) -> str:
+    selection_errors = bullet_selection_errors(spec, facts)
+    if selection_errors:
+        raise ValueError("; ".join(selection_errors))
     bank = bullet_bank(facts)
     chosen = spec.get("bullets") or {}
     c = facts.get("contact", {})
@@ -263,10 +286,10 @@ def cmd_build(args) -> int:
         errors, warnings = check_spec(spec, facts)
         for w in warnings:
             print("WARN ", w)
-        if errors and not args.force:
+        if errors and (not args.force or bullet_selection_errors(spec, facts)):
             for e in errors:
                 print("BLOCK", e)
-            print(f"NOT BUILT {sp}: fix the problems above (or --force if you are sure they are true)")
+            print(f"NOT BUILT {sp}: fix the problems above (--force cannot override invalid bullet selections)")
             rc = 1
             continue
         short = spec.get("short") or re.sub(r"\W+", "", spec["company"])[:24]
@@ -445,7 +468,7 @@ def cmd_init(args) -> int:
             never.append(s)
     never += [x.lower() for x in _ask_list("Anything else you must never claim (tools, licences, titles)")]
     facts["never_claim"] = never
-    facts.update(bullet_match_threshold=0.85, default_bullets=3, letter_signoff="Sincerely,")
+    facts.update(default_bullets=3, letter_signoff="Sincerely,")
 
     print("\n== Jobs you want")
     roles = _ask_list("Target roles, highest priority first")
@@ -510,3 +533,4 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
+

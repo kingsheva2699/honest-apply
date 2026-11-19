@@ -4,14 +4,14 @@ Prepare tailored résumés and cover letters from experience you can back up. Ho
 
 ## What it does
 
-- **Reuse your experience.** Keep confirmed work history, skills, and education in `profile/facts.yaml`. Prefer selecting existing résumé bullets by index so the original wording is reused.
+- **Reuse your experience.** Keep confirmed work history, skills, and education in `profile/facts.yaml`. Select existing résumé bullets by zero-based integer index or exact text under the same experience ID. Changed wording or quantities are rejected, even with `build --force`.
 - **Check a draft before building.** `apply.py check` flags some prohibited terms, unmatched bullets, leftover placeholders, and references to other companies in your application log. It warns if a nonempty letter appears not to mention the current company.
 - **Build application files.** `apply.py build` generates résumé and cover-letter HTML plus a plain-text cover letter. It also generates PDFs when a supported renderer is available.
 - **Keep answers and outcomes organized.** Store approved screener answers separately and log applications and outcomes manually. `apply.py stats` summarizes current recorded outcomes by role category and source. It does not read your inbox or preserve a separate history of status changes.
 
 ## What the checks can miss
 
-**A passing check does not mean every claim is true.** Free-text résumé sections and letters get keyword and pattern checks, not verification against your experience. Typed bullets can pass on text similarity even when a number or duty has changed. For example, changing “60 appointments” to “600 appointments” can still pass. The letter check can also miss an incorrect company if that name is not in your application log.
+**A passing check does not mean every claim is true.** Free-text résumé sections and letters get keyword and pattern checks, not verification against your experience. Selected bullets must match the fact bank exactly; for example, changing “60 appointments” to “600 appointments” is rejected. This checks consistency with your saved facts, not whether those facts are true. The old `bullet_match_threshold` setting is ignored. The letter check can also miss an incorrect company if that name is not in your application log.
 
 Use bullet indices where possible. Before sending anything, compare facts, numbers, dates, employer names, and screener answers with your original information.
 
@@ -62,3 +62,4 @@ The safest path is to use the toolkit to prepare the files, then fill and review
 | `python apply.py stats` | Summarize current application outcomes |
 
 See [Contributing](CONTRIBUTING.md) and the [MIT license](LICENSE).
+

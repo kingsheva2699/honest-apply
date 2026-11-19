@@ -59,8 +59,7 @@ never_claim:
   - team lead
   - supervised
 
-# How close a resume bullet must be to a fact-bank bullet (0-1). 0.85 allows
-# small wording edits but not new claims.
-bullet_match_threshold: 0.85
+# Maximum default bullets per experience when no selection is supplied.
 default_bullets: 3
 letter_signoff: "Sincerely,"
+

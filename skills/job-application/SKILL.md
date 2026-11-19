@@ -20,7 +20,7 @@ small and batch shell work.
 1. Facts only from `facts.yaml`, `answers.md`, or what the user says in this chat.
    Never invent a degree, licence, tool, title, number or duty. If a posting
    wants something the user lacks, say so honestly in the letter.
-2. Resume bullets are picked from the fact bank (by index or close match).
+2. Resume bullets are picked from the fact bank (by zero-based integer index or exact text within that experience).
    Do not reword bullets to mirror the posting; `apply.py check` blocks it.
 3. Every package must pass `python apply.py check` before it is used.
 4. Job-board autofill is untrusted. Boards pre-fill answers and cover-letter
@@ -83,6 +83,7 @@ Write `jobs/<short>.json`:
 ```
 Then `python apply.py build jobs/<short>.json`. Expect `OK <short> ... resume_pages=1`.
 If it prints BLOCK lines, fix the spec (never use `--force` without the user's yes).
+Invalid bullet selections cannot be overridden with `--force`; confirm any genuine new fact with the user and update the fact bank first.
 
 ## Step 4 - fill the application (optional: browser automation)
 > WARNING. Some job boards' terms prohibit automated filling of their apply
@@ -115,3 +116,4 @@ and remove the job from `QUEUE.md`.
 - `python apply.py stats` - response rate by category and source; put effort where replies come from.
 - Record replies with `python apply.py outcome "<Company>" interview|rejected|offer|no_response`.
 - Send a thank-you within 24 hours of every interview, and follow up on interviews with no news after a week.
+
