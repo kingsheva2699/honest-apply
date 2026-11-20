@@ -42,11 +42,30 @@ For PDF output, run `python -m playwright install chromium` or set up WeasyPrint
 
 Personal working files in the default profile, data, jobs, and output folders are ignored by Git, with the fictional examples tracked. Check what is staged before committing. Sharing files with an AI agent or another service is a separate choice; Git exclusions do not control its access or retention.
 
+## Editions and automatic selection
+
+| Edition | When it is selected |
+|---|---|
+| [Core toolkit](skills/job-application/SKILL.md) | Python available, default workflow for OpenAI, other, and unknown model families |
+| [Claude](editions/claude/README.md) | Python available and a Claude host or model is identified, unless Indeed is selected |
+| [Indeed preparation](editions/indeed/README.md) | Python available and the application is for Indeed, regardless of model |
+| [Manual checklist](editions/manual.md) | The AI host cannot run Python |
+
+Give your agent [the start workflow](WORKFLOW.md) to route automatically. If you are using the command line yourself, for example:
+
+```bash
+python select_workflow.py --model claude-sonnet-4-5
+python select_workflow.py --model gpt-5 --board indeed
+python select_workflow.py --model gpt-5 --board linkedin
+```
+
+Use `--host claude` or `--host other` if the host is known, or open the manual checklist directly in a text-only chat. The selector only reports which local files to use. It doesn't launch an agent or infer hidden model identities. Keep each edition's local data separate; profiles are not interchangeable. Use these editions for preparation only; LinkedIn and Indeed applications are filled and submitted by you.
+
 ## Using it with an AI agent
 
-Give a shell-capable agent the [job application workflow](skills/job-application/SKILL.md) and work on one application at a time. Review any facts it extracts from an existing résumé before saving them to your profile. The Python toolkit prepares files and tracks outcomes; it does not browse job boards, fill forms, or submit applications. Agent support depends on the tools and permissions available in that agent.
+For the core edition, give a shell-capable agent the [job application workflow](skills/job-application/SKILL.md) and work on one application at a time. Review any facts it extracts from an existing résumé before saving them to your profile. The Python toolkit prepares files and tracks outcomes; it does not browse job boards, fill forms, or submit applications. Agent support depends on the tools and permissions available in that agent.
 
-The safest path is to use the toolkit to prepare the files, then fill and review the application yourself. Do not automate a job board’s application flow unless the board permits it. Verify any prefilled answers, handle sensitive or legal questions yourself, and press **Submit** only after your own review. This project is not affiliated with or endorsed by any job board or AI provider.
+The safest path is to use the toolkit to prepare the files, then fill and review the application yourself. None of the included workflows automates a job board’s live application form. Verify any prefilled answers, handle sensitive or legal questions yourself, and press **Submit** only after your own review. This project is not affiliated with or endorsed by any job board or AI provider.
 
 ## Commands
 

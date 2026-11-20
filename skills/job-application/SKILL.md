@@ -5,9 +5,7 @@ description: Use when the user says "next application" or asks to find a job and
 
 # Next application - one honest application per conversation
 
-Goal: take ONE job from search to a filled-in, checked application, then hand
-it to the user to submit. Never hand back a half-filled form. Keep tool output
-small and batch shell work.
+Goal: prepare ONE checked application package and hand it to the user to fill and submit. Do not operate live application forms.
 
 ## Files (paths relative to the kit folder)
 - `profile/facts.yaml` - the user's only source of truth for resume content.
@@ -23,16 +21,13 @@ small and batch shell work.
 2. Resume bullets are picked from the fact bank (by zero-based integer index or exact text within that experience).
    Do not reword bullets to mirror the posting; `apply.py check` blocks it.
 3. Every package must pass `python apply.py check` before it is used.
-4. Job-board autofill is untrusted. Boards pre-fill answers and cover-letter
-   boxes from earlier applications. Read every field on every page and correct
-   it against `answers.md` before pressing Continue.
+4. Remind the user to compare any job-board prefilled answers with the reviewed answer list.
 5. Degree/diploma questions get exactly the answer in `answers.md`.
-6. Criminal-record, background, medical and legal questions are answered by the
-   user. Fill everything else first, then name the remaining questions and stop.
+6. The user answers criminal-record, background, medical and legal questions themselves. Do not guess or collect those answers.
 7. Never solve CAPTCHAs or bot checks, never type passwords or one-time codes,
    never create accounts. Ask the user to do those, then continue.
-8. Never press the final Submit / Send button. The user does.
-9. Never click "Apply anyway" past a qualification warning without the user's yes.
+8. The user fills, uploads files to, and submits the live application themselves.
+9. Flag qualification warnings without advancing the application.
 10. New facts the user states go into `facts.yaml` or `answers.md` (ask first).
 
 ## Step 0 - first-time setup (only if `profile/facts.yaml` does not exist)
@@ -85,35 +80,20 @@ Then `python apply.py build jobs/<short>.json`. Expect `OK <short> ... resume_pa
 If it prints BLOCK lines, fix the spec (never use `--force` without the user's yes).
 Invalid bullet selections cannot be overridden with `--force`; confirm any genuine new fact with the user and update the fact bank first.
 
-## Step 4 - fill the application (optional: browser automation)
-> WARNING. Some job boards' terms prohibit automated filling of their apply
-> forms (for example, Indeed's terms prohibit automating Indeed Apply outside
-> its official tools). Using this step can get the user's account restricted.
-> Tell the user this once and only do it if they choose to. The alternative is
-> to give them the PDF, the letter text and a list of answers to paste.
-
-If the user wants it:
-1. Open the application form. If a sign-in page, CAPTCHA or bot check appears, stop and ask the user.
-2. Resume step: upload `out/<short>/<short>_Resume.pdf` via the file input; confirm the filename shows.
-3. Every questions page: (a) list each field's current value, (b) correct all of
-   them from `answers.md`, including pre-filled ones, (c) list again, then Continue.
-4. Cover letter: clear the box completely (it may hold an old letter), paste
-   `out/<short>/letter.txt`, confirm the character count and that no other
-   company name remains.
-5. Review page: read every answer once more. Do not press Submit.
-
-## Step 5 - hand off
-Tell the user: company, title, pay, location, what was filled, any corrections
-made to autofill, honest gaps, and which questions (if any) they must answer.
-Ask them to submit and reply "done".
+## Steps 4–5 - human handoff
+Give the user the résumé, cover-letter text, and a list of answers they approved.
+Note missing facts, unresolved questions, and any employer or qualification
+warnings. Do not interact with live application forms, including LinkedIn or
+Indeed. The user opens, fills, reviews, and submits the application themselves.
+Ask them to reply "done" after submitting.
 
 ## Step 6 - after "done"
-Confirm the confirmation page if you can see it (never guess). Then
+Use the user’s confirmation or a receipt they supply; never assume submission. Then
 `python apply.py done "<Company>" "<Title>" --source <board> --category <role type>`
 and remove the job from `QUEUE.md`.
 
 ## Weekly
 - `python apply.py stats` - response rate by category and source; put effort where replies come from.
 - Record replies with `python apply.py outcome "<Company>" interview|rejected|offer|no_response`.
-- Send a thank-you within 24 hours of every interview, and follow up on interviews with no news after a week.
+- Suggest a thank-you or follow-up draft when helpful. Do not send it.
 

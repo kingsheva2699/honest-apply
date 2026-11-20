@@ -8,5 +8,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install pyyaml pypdf pytest
-      - run: pytest -q
+      - run: pip install pyyaml pypdf pytest -r editions/indeed/requirements-test.txt
+      - run: python -m pytest tests -q
+      - run: python -m unittest discover -s editions/claude/tests -q
+      - run: python -m unittest discover -s editions/indeed/tests -q

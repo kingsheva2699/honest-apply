@@ -1,0 +1,3 @@
+# Additional dependencies for the PDF tests
+-r requirements-pdf.txt
+pypdf>=6,<7
